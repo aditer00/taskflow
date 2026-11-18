@@ -1,0 +1,63 @@
+{{define "content"}}
+<div class="max-w-[360px] mx-auto pt-6 sm:pt-12 pb-10">
+    <div class="text-center mb-8">
+        <div class="w-10 h-10 mx-auto mb-5 rounded-[8px] bg-[#0a1530] text-[#ffffff] font-mono text-base font-semibold inline-flex items-center justify-center" aria-hidden="true">
+            T
+        </div>
+        <h1 class="text-[22px] font-semibold tracking-[-0.02em] leading-[1.3] text-[#1a1a1a]">
+            Your task workspace.
+        </h1>
+        <p class="text-[22px] font-semibold tracking-[-0.02em] leading-[1.3] text-[#787671]">
+            Create your TaskFlow account
+        </p>
+    </div>
+
+    {{if .Error}}
+    <div class="mb-4 p-3 bg-[#fde0ec] border border-[#e03131]/30 rounded-[8px] text-xs font-medium text-[#b91c1c]" role="alert">
+        {{.Error}}
+    </div>
+    {{end}}
+
+    <form method="POST" action="/register" class="space-y-4">
+        <div>
+            <label for="reg-name" class="block text-xs font-medium text-[#5d5b54] mb-1.5">Name</label>
+            <input id="reg-name" name="name" type="text" required autocomplete="name" value="{{.Name}}"
+                placeholder="Enter your name..."
+                class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3.5 py-2 text-sm text-[#1a1a1a] placeholder:text-[#a4a097] focus:border-[#0075de]">
+        </div>
+
+        <div>
+            <label for="reg-email" class="block text-xs font-medium text-[#5d5b54] mb-1.5">Email</label>
+            <input id="reg-email" name="email" type="email" required autocomplete="email" value="{{.Email}}"
+                placeholder="Enter your email address..."
+                class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3.5 py-2 text-sm text-[#1a1a1a] placeholder:text-[#a4a097] focus:border-[#0075de]">
+        </div>
+
+        <div>
+            <label for="reg-password" class="block text-xs font-medium text-[#5d5b54] mb-1.5">Password</label>
+            <input id="reg-password" name="password" type="password" required minlength="8" autocomplete="new-password"
+                placeholder="At least 8 characters..."
+                class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3.5 py-2 text-sm text-[#1a1a1a] placeholder:text-[#a4a097] focus:border-[#0075de]">
+        </div>
+
+        <div>
+            <label for="reg-password-confirm" class="block text-xs font-medium text-[#5d5b54] mb-1.5">Confirm password</label>
+            <input id="reg-password-confirm" name="password_confirmation" type="password" required minlength="8" autocomplete="new-password"
+                placeholder="Repeat your password..."
+                class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3.5 py-2 text-sm text-[#1a1a1a] placeholder:text-[#a4a097] focus:border-[#0075de]">
+        </div>
+
+        <button type="submit"
+            class="w-full min-h-[44px] px-4 py-2.5 bg-[#0075de] hover:bg-[#005bab] text-[#ffffff] text-sm font-medium rounded-[8px] cursor-pointer">
+            Continue
+        </button>
+    </form>
+
+    <p class="mt-8 text-center text-[13px] text-[#5d5b54]">
+        Already have an account?
+        <a href="/login" class="inline-flex items-center min-h-[44px] px-1 font-medium text-[#5d5b54] underline underline-offset-4 hover:text-[#1a1a1a]">
+            Sign in
+        </a>
+    </p>
+</div>
+{{end}}

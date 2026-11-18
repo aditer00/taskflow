@@ -1,0 +1,120 @@
+services:
+  web:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    command: ["web"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stop_grace_period: 15s
+    networks:
+      - taskflow
+
+  worker:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - .env
+    command: ["worker"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stop_grace_period: 30s
+    networks:
+      - taskflow
+
+  scheduler:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - .env
+    command: ["scheduler"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stop_grace_period: 15s
+    networks:
+      - taskflow
+
+  postgres:
+    image: postgres:16.16-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-taskflow}
+      POSTGRES_USER: ${DB_USERNAME:-taskflow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-taskflow} -d ${DB_DATABASE:-taskflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - taskflow
+
+  redis:
+    image: redis:7.4.12-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - taskflow
+
+  minio:
+    image: rustfs/rustfs:1.0.6
+    environment:
+      RUSTFS_ACCESS_KEY: ${AWS_ACCESS_KEY_ID:-minioadmin}
+      RUSTFS_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY:-minioadmin}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - taskflow
+
+  minio-init:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - .env
+    command: ["init-bucket"]
+    depends_on:
+      - minio
+    networks:
+      - taskflow
+
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - taskflow
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  taskflow:
+    driver: bridge

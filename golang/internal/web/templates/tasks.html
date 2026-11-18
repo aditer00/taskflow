@@ -1,0 +1,143 @@
+{{define "content"}}
+<div class="space-y-8">
+    <div class="border-b border-[#e5e3df] pb-5">
+        <nav aria-label="Breadcrumb" class="mb-2">
+            <a href="/projects" class="inline-flex items-center min-h-[44px] text-sm font-medium text-[#0075de] hover:text-[#005bab] hover:underline underline-offset-4">
+                Back to projects
+            </a>
+        </nav>
+
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div>
+                <h1 class="text-[28px] sm:text-[36px] font-semibold tracking-[-0.02em] leading-[1.2] text-[#1a1a1a]">
+                    {{.Project.Name}}
+                </h1>
+                {{if .Project.Description}}
+                    <p class="text-sm text-[#5d5b54] mt-1">{{.Project.Description}}</p>
+                {{end}}
+            </div>
+
+            <div class="flex items-center gap-2 font-mono text-xs font-medium">
+                <span class="px-2.5 py-1 bg-[#f0eeec] text-[#37352f] rounded-[6px]">Total: {{.TotalCount}}</span>
+                <span class="px-2.5 py-1 bg-[#dcecfa] text-[#0a1530] rounded-[6px]">Open: {{.OpenCount}}</span>
+                <span class="px-2.5 py-1 bg-[#d9f3e1] text-[#14532d] rounded-[6px]">Done: {{.DoneCount}}</span>
+            </div>
+        </div>
+    </div>
+
+    <section aria-label="Add task" class="bg-[#fafaf9] border border-[#e5e3df] rounded-[12px] p-5 sm:p-6">
+        <h2 class="text-[18px] font-semibold text-[#1a1a1a] mb-4">Add task</h2>
+        {{if .Error}}
+        <div class="mb-4 p-3 bg-[#fde0ec] border border-[#e03131]/30 rounded-[8px] text-xs font-medium text-[#b91c1c]" role="alert">
+            {{.Error}}
+        </div>
+        {{end}}
+        <form method="POST" action="/projects/{{.Project.ID}}/tasks" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label for="task-title" class="block text-[13px] font-semibold text-[#1a1a1a] mb-1.5">Title</label>
+                <input id="task-title" name="title" type="text" required maxlength="160" placeholder="Configure stderr logging"
+                    class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3.5 py-2 text-sm text-[#1a1a1a] placeholder:text-[#787671] focus:border-[#0075de]">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="task-priority" class="block text-[13px] font-semibold text-[#1a1a1a] mb-1.5">Priority</label>
+                    <select id="task-priority" name="priority"
+                        class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3 py-2 text-sm text-[#1a1a1a] focus:border-[#0075de]">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="task-due" class="block text-[13px] font-semibold text-[#1a1a1a] mb-1.5">Due date</label>
+                    <input id="task-due" name="due_date" type="date"
+                        class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3 py-2 text-sm text-[#1a1a1a] focus:border-[#0075de]">
+                </div>
+            </div>
+
+            <div>
+                <label for="task-desc" class="block text-[13px] font-semibold text-[#1a1a1a] mb-1.5">Description (optional)</label>
+                <input id="task-desc" name="description" type="text" maxlength="1000" placeholder="Acceptance criteria or notes"
+                    class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3.5 py-2 text-sm text-[#1a1a1a] placeholder:text-[#787671] focus:border-[#0075de]">
+            </div>
+
+            <div>
+                <label for="task-attachment" class="block text-[13px] font-semibold text-[#1a1a1a] mb-1.5">Attachment (S3, max 5MB)</label>
+                <input id="task-attachment" name="attachment" type="file"
+                    class="w-full min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-2 py-1.5 text-xs text-[#5d5b54] file:mr-3 file:py-1.5 file:px-3 file:rounded-[6px] file:border-0 file:bg-[#f0eeec] file:text-[#1a1a1a] file:font-medium hover:file:bg-[#e5e3df]">
+            </div>
+
+            <div class="sm:col-span-2 pt-1">
+                <button type="submit"
+                    class="min-h-[44px] px-[18px] py-2.5 bg-[#0075de] hover:bg-[#005bab] text-[#ffffff] text-sm font-medium rounded-[8px] cursor-pointer">
+                    Create task
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section aria-label="Task list">
+        {{if not .Tasks}}
+            <div class="bg-[#f6f5f4] border border-[#e5e3df] rounded-[12px] p-10 text-center">
+                <p class="text-base font-semibold text-[#1a1a1a]">No tasks in this project yet</p>
+                <p class="text-sm text-[#5d5b54] mt-1">Add a task above to trigger queue notifications and S3 storage.</p>
+            </div>
+        {{else}}
+            <div class="space-y-3">
+                {{range .Tasks}}
+                    <div class="bg-[#ffffff] border border-[#e5e3df] hover:bg-[#fafaf9] rounded-[12px] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="min-w-0 space-y-1.5">
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <span class="text-base font-medium {{if eq .Status "done"}}line-through text-[#787671]{{else}}text-[#1a1a1a]{{end}}">
+                                    {{.Title}}
+                                </span>
+                                <span class="font-mono text-xs font-medium capitalize px-2.5 py-0.5 rounded-[6px] {{if eq .Priority "high"}}bg-[#fde0ec] text-[#a02e6d]{{else if eq .Priority "medium"}}bg-[#ffe8d4] text-[#793400]{{else}}bg-[#f0eeec] text-[#5d5b54]{{end}}">
+                                    {{.Priority}}
+                                </span>
+                            </div>
+
+                            {{if .Description}}
+                                <p class="text-sm text-[#5d5b54]">{{.Description}}</p>
+                            {{end}}
+
+                            {{if or .DueDate .AttachmentPath}}
+                                <div class="flex items-center gap-4 flex-wrap text-xs text-[#5d5b54] pt-0.5">
+                                    {{if .DueDate}}
+                                        <span class="font-mono">Due: {{.DueDate}}</span>
+                                    {{end}}
+                                    {{if .AttachmentPath}}
+                                        <a href="/tasks/{{.ID}}/attachment" target="_blank"
+                                            class="inline-flex items-center min-h-[44px] sm:min-h-0 font-medium text-[#0075de] hover:text-[#005bab] hover:underline underline-offset-4">
+                                            Download attachment
+                                        </a>
+                                    {{end}}
+                                </div>
+                            {{end}}
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <form method="POST" action="/tasks/{{.ID}}/status" class="flex items-center gap-2">
+                                <label for="status-{{.ID}}" class="sr-only">Task status</label>
+                                <select id="status-{{.ID}}" name="status" onchange="this.form.submit()"
+                                    class="min-h-[44px] bg-[#ffffff] border border-[#c8c4be] rounded-[8px] px-3 py-1.5 text-sm font-medium text-[#1a1a1a] focus:border-[#0075de]">
+                                    <option value="todo" {{if eq .Status "todo"}}selected{{end}}>Todo</option>
+                                    <option value="in_progress" {{if eq .Status "in_progress"}}selected{{end}}>In Progress</option>
+                                    <option value="done" {{if eq .Status "done"}}selected{{end}}>Done</option>
+                                </select>
+                            </form>
+
+                            <form method="POST" action="/tasks/{{.ID}}/delete">
+                                <button type="submit"
+                                    class="inline-flex items-center justify-center min-h-[44px] px-3.5 text-sm font-medium text-[#e03131] border border-[#e5e3df] hover:bg-[#fde0ec] rounded-[8px] cursor-pointer">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {{end}}
+            </div>
+        {{end}}
+    </section>
+</div>
+{{end}}
