@@ -1,0 +1,106 @@
+<x-layouts.app title="TaskFlow - 12-Factor Task Management">
+    <div class="space-y-16">
+        <section class="pt-4 sm:pt-8">
+            <div class="max-w-3xl">
+                <h1 class="text-[36px] sm:text-[56px] font-semibold tracking-[-0.03em] leading-[1.1] text-[#1a1a1a]">
+                    Task management built for 12-Factor infrastructure.
+                </h1>
+                <p class="text-base sm:text-lg text-[#5d5b54] mt-5 max-w-2xl leading-[1.55]">
+                    Organize projects, track task status, store attachments in S3, and process email notifications asynchronously through Redis workers.
+                </p>
+
+                <div class="mt-8 flex flex-wrap items-center gap-3">
+                    @auth
+                        <a href="{{ route('projects.index') }}"
+                            class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-[#0075de] hover:bg-[#005bab] text-[#ffffff] text-sm font-medium rounded-[8px]">
+                            Open projects
+                        </a>
+                    @else
+                        <a href="{{ route('register') }}"
+                            class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 bg-[#0075de] hover:bg-[#005bab] text-[#ffffff] text-sm font-medium rounded-[8px]">
+                            Get started
+                        </a>
+                        <a href="{{ route('login') }}"
+                            class="inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 text-[#1a1a1a] border border-[#c8c4be] hover:bg-[#f6f5f4] text-sm font-medium rounded-[8px]">
+                            Sign in
+                        </a>
+                    @endauth
+                </div>
+            </div>
+        </section>
+
+        <section aria-label="Core capabilities" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-[#e6e0f5] rounded-[12px] p-6">
+                <span class="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#391c57]">Projects &amp; Tasks</span>
+                <h2 class="text-[18px] font-semibold text-[#1a1a1a] mt-2">Stateless workspace</h2>
+                <p class="text-sm text-[#37352f] mt-2 leading-[1.5]">
+                    Create projects, manage task priorities and due dates, with user sessions stored in Redis.
+                </p>
+            </div>
+
+            <div class="bg-[#d9f3e1] rounded-[12px] p-6">
+                <span class="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#14532d]">Object Storage</span>
+                <h2 class="text-[18px] font-semibold text-[#1a1a1a] mt-2">S3 file attachments</h2>
+                <p class="text-sm text-[#37352f] mt-2 leading-[1.5]">
+                    Upload task documents directly to S3-compatible storage (RustFS) without writing to container disks.
+                </p>
+            </div>
+
+            <div class="bg-[#ffe8d4] rounded-[12px] p-6">
+                <span class="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#793400]">Background Jobs</span>
+                <h2 class="text-[18px] font-semibold text-[#1a1a1a] mt-2">Async queue &amp; scheduler</h2>
+                <p class="text-sm text-[#37352f] mt-2 leading-[1.5]">
+                    Task events dispatch email notifications to a separate worker process and emit periodic heartbeats.
+                </p>
+            </div>
+        </section>
+
+        <section aria-label="12-Factor runtime architecture" class="bg-[#0a1530] text-[#ffffff] rounded-[16px] p-6 sm:p-10">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                <div class="md:col-span-5">
+                    <span class="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[#d6b6f6]">Architecture</span>
+                    <h2 class="text-[28px] font-semibold tracking-[-0.02em] leading-[1.25] mt-2">
+                        Separated processes, attached resources.
+                    </h2>
+                    <p class="text-sm text-[#a4a097] mt-3 leading-[1.55]">
+                        Built to demonstrate all twelve factors in Docker Compose: environment-based config, stdout/stderr log streams, graceful SIGTERM shutdown, and one-off migrations.
+                    </p>
+                    <div class="mt-6">
+                        <a href="{{ route('health') }}" target="_blank"
+                            class="inline-flex items-center min-h-[44px] px-4 py-2 text-sm font-medium text-[#ffffff] border border-[#a4a097] hover:bg-[#1a2a52] rounded-[8px]">
+                            Inspect /health
+                        </a>
+                    </div>
+                </div>
+
+                <div class="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+                    <div class="bg-[#1a2a52] rounded-[8px] p-4">
+                        <div class="text-[#d6b6f6] font-semibold">web / app</div>
+                        <div class="text-[#ffffff] mt-1">Stateless HTTP &amp; Livewire</div>
+                    </div>
+                    <div class="bg-[#1a2a52] rounded-[8px] p-4">
+                        <div class="text-[#d6b6f6] font-semibold">worker</div>
+                        <div class="text-[#ffffff] mt-1">Redis queue to Mailpit SMTP</div>
+                    </div>
+                    <div class="bg-[#1a2a52] rounded-[8px] p-4">
+                        <div class="text-[#d6b6f6] font-semibold">scheduler</div>
+                        <div class="text-[#ffffff] mt-1">1-minute heartbeat to stderr</div>
+                    </div>
+                    <div class="bg-[#1a2a52] rounded-[8px] p-4">
+                        <div class="text-[#d6b6f6] font-semibold">postgres + redis + s3</div>
+                        <div class="text-[#ffffff] mt-1">Backing services via env vars</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="border-t border-[#e5e3df] pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-[#5d5b54]">
+            <span>TaskFlow 12-Factor Case Study</span>
+            <div class="flex items-center gap-4">
+                <a href="{{ route('login') }}" class="inline-flex items-center min-h-[44px] sm:min-h-0 hover:text-[#1a1a1a]">Sign in</a>
+                <a href="{{ route('register') }}" class="inline-flex items-center min-h-[44px] sm:min-h-0 hover:text-[#1a1a1a]">Register</a>
+                <a href="{{ route('health') }}" target="_blank" class="inline-flex items-center min-h-[44px] sm:min-h-0 font-mono hover:text-[#1a1a1a]">/health</a>
+            </div>
+        </footer>
+    </div>
+</x-layouts.app>
